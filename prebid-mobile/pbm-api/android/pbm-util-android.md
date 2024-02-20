@@ -1,7 +1,7 @@
 ---
 layout: page_v2
 title: Prebid SDK Utilities - Android
-description: Utilities used in conjuntion with the Prebid SDK
+description: Utilities used in conjunction with the Prebid SDK
 top_nav_section: prebid-mobile
 nav_section: prebid-mobile
 sidebarType: 2
@@ -10,7 +10,7 @@ sidebarType: 2
 # Prebid SDK Utility functions
 {:.no_toc}
 
-This page will store any utilities that can used in conjuntion with the Prebid SDK.
+This page will store any utilities that can used in conjunction with the Prebid SDK.
 
 * TOC
 {:toc}
