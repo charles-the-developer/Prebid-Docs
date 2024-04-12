@@ -39,4 +39,3 @@ func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
 ```
 
 
-

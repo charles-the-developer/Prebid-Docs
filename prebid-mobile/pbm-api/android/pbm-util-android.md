@@ -43,4 +43,3 @@ adView.adListener = object : AdListener() {
     }
 }
 ```
-
