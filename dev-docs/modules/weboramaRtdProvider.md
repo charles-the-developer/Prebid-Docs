@@ -12,7 +12,6 @@ sidebarType : 1
 ---
 
 # Weborama RTD Segmentation Module
-
 {:.no_toc}
 
 * TOC
@@ -111,8 +110,6 @@ This is the main configuration section
 | params.weboUserDataConf | Object | Weborama WAM User-Centric Configuration | Optional |
 | params.sfbxLiteDataConf | Object | Sfbx LiTE Site-Centric Configuration | Optional |
 | params.onData | Callback | If set, will receive the profile and metadata | Optional. Affects the `weboCtxConf`, `weboUserDataConf` and `sfbxLiteDataConf` sections |
-| params.setProfileAsBidderKeywords | Object | If present, specify one or more bidders to send data also as keywords (`site.content.keywords` or `user.keywords`) | Optional. Affects the `weboCtxConf`, `weboUserDataConf` and `sfbxLiteDataConf` sections  |
-| params.checkBidderAliasForKeywords | Boolean | Modify `params.setProfileAsBidderKeywords` to search in the bidder alias registry| Optional. Affects the `weboCtxConf`, `weboUserDataConf` and `sfbxLiteDataConf` sections  |
 
 #### Contextual Site-Centric Configuration
 
@@ -132,12 +129,10 @@ On this section we will explain the `params.weboCtxConf` subconfiguration:
 | onData | Callback | If set, will receive the profile and metadata | Optional. Default is `params.onData` (if any) or log via prebid debug |
 | enabled | Boolean| if false, will ignore this configuration| Default is `true` if this section is present|
 | baseURLProfileAPI | String| if present, update the domain of the contextual api| Optional. Default is `ctx.weborama.com` |
-| setProfileAsBidderKeywords | String or Array | If present, specify one or more bidders to send data also as keywords (`site.content.keywords` or `user.keywords`) | Optional. Default is `appnexus`. |
-| checkBidderAliasForKeywords | Boolean | Modify `setProfileAsBidderKeywords` to search in the bidder alias registry. | Optional. Default is `true` |
 
-#### WAM User-Centric Configuration
+#### User-Centric Configuration
 
-To be possible use the integration with Weborama Audience Manager (WAM) you must be a client with an account id and you lust include the `wamfactory` script in your pages with `wam2gam` feature activated.
+To be possible use the integration with Weborama Audience Manager (WAM) you must be a client with an account id and you must include the `wamfactory` script in your pages with `wam2gam` feature activated.
 Please contact weborama if you don't have it.
 
 On this section we will explain the `params.weboUserDataConf` subconfiguration:
@@ -152,8 +147,11 @@ On this section we will explain the `params.weboUserDataConf` subconfiguration:
 | defaultProfile | Object | default value of the profile to be used when there are no response from contextual api (such as timeout)| Optional. Default is `{}` |
 | localStorageProfileKey| String | can be used to customize the local storage key | Optional |
 | enabled | Boolean| if false, will ignore this configuration| Default is `true` if this section is present|
-| setProfileAsBidderKeywords | String or Array | If present, specify one or more bidders to send data also as keywords (`site.content.keywords` or `user.keywords`) | Optional. Default is `appnexus`. |
-| checkBidderAliasForKeywords | Boolean | Modify `setProfileAsBidderKeywords` to search in the bidder alias registry. | Optional. Default is `true` |
+
+##### User Consent
+
+In a user-centric configuration, the WAM module will verify user consent when GDPR is applicable. It specifically checks for consent related to the purposes declared by Weborama in the Global Vendor List (Vendor ID 284). 
+If the required consent is not provided, the module will not activate, and it will neither access local storage nor apply any default user profile.
 
 #### Sfbx LiTE Site-Centric Configuration
 
@@ -170,8 +168,6 @@ On this section we will explain the `params.sfbxLiteDataConf` subconfiguration:
 | defaultProfile | Object | default value of the profile to be used when there are no response from contextual api (such as timeout)| Optional. Default is `{}` |
 | localStorageProfileKey| String | can be used to customize the local storage key | Optional |
 | enabled | Boolean| if false, will ignore this configuration| Default is `true` if this section is present|
-| setProfileAsBidderKeywords | String or Array | If present, specify one or more bidders to send data also as keywords (`site.content.keywords` or `user.keywords`) | Optional. Default is `appnexus`. |
-| checkBidderAliasForKeywords | Boolean | Modify `setProfileAsBidderKeywords` to search in the bidder alias registry. | Optional. Default is `true` |
 
 ##### Property setPrebidTargeting supported types
 
@@ -193,6 +189,28 @@ setPrebidTargeting: function(adUnitCode, data, metadata){
 }
 ```
 
+This callback will be executed with the adUnitCode, profile and a metadata with the following fields
+
+{: .table .table-bordered .table-striped }
+| Name  |Type | Description   | Notes  |
+| :------------ | :------------ | :------------ |:------------ |
+| user | Boolean | If true, it contains user-centric data |  |
+| source | String | Represent the source of data | can be `contextual`, `wam` or `lite`  |
+| isDefault | Boolean | If true, it contains the default profile defined in the configuration |  |
+
+It is possible customize the targeting based on the parameters:
+
+```javascript
+setPrebidTargeting: function(adUnitCode, data, metadata){
+    // check metadata.source can be omitted if defined in params.weboUserDataConf
+    if (adUnitCode == 'adUnitCode1' && metadata.source == 'wam'){
+        data['foo']=['bar'];  // add this section only for adUnitCode1
+        delete data['other']; // remove this section
+    }
+    return true;
+}
+```
+
 ##### Property sendToBidders supported types
 
 This property support the following types
@@ -201,16 +219,16 @@ This property support the following types
 | Type  | Description | Example   | Notes  |
 | :------------ | :------------ | :------------ |:------------ |
 | Boolean|If true, send data to all bidders, or not in case of false| `true` | default value |
-| String|Will send data to only one bidder | `'appnexus'` |  |
-| Array of Strings|Will send data to only some bidders | `['appnexus','pubmatic']` |  |
-| Object |Will send data to only some bidders and some ad units | `{appnexus: true, pubmatic:['adUnitCode1']}` |  |
-| Callback |Will be executed for each adunit, expects return a true value to set prebid targeting or not| `function(bid, adUnitCode){return bid.bidder == 'appnexus' && adUnitCode == 'adUnitCode';}` | the parameter `adUnitCode` can be consider  |
+| String|Will send data to only one bidder | `'msft'` |  |
+| Array of Strings|Will send data to only some bidders | `['msft','pubmatic']` |  |
+| Object |Will send data to only some bidders and some ad units | `{msft: true, pubmatic:['adUnitCode1']}` |  |
+| Callback |Will be executed for each adunit, expects return a true value to set prebid targeting or not| `function(bid, adUnitCode){return bid.bidder == 'msft' && adUnitCode == 'adUnitCode';}` |  |
 
 A better look on the `Object` type
 
 ```javascript
 sendToBidders: {
-    appnexus: true,           // send profile to appnexus on all ad units
+    msft: true,           // send profile to msft on all ad units
     pubmatic: ['adUnitCode1'],// send profile to pubmatic on this ad units 
 }
 ```
@@ -236,8 +254,8 @@ It is possible customize the targeting based on the parameters:
 
 ```javascript
 sendToBidders: function(bid, adUnitCode, data, metadata){
-    if (bid.bidder == 'appnexus'){
-        data['foo']=['bar']; // add this section only for appnexus + adUnitCode1
+    if (bid.bidder == 'msft' && adUnitCode == 'adUnitCode1'){
+        data['foo']=['bar']; // add this section only for msft + adUnitCode1
         delete data['other']; // remove this section
     }
     return true;
@@ -264,7 +282,7 @@ sendToBidders: function(bid, adUnitCode, data, metadata){
 In case of using bid _aliases_, we should match the same string used in the adUnit configuration.
 
 ```javascript
-pbjs.aliasBidder('appnexus', 'foo');
+pbjs.aliasBidder('msft', 'foo');
 pbjs.aliasBidder('criteo', 'bar');
 pbjs.aliasBidder('pubmatic', 'baz');
 pbjs.setConfig({
@@ -485,7 +503,7 @@ pbjs.que.push(function () {
                     weboCtxConf: {
                         token: "to-be-defined", // mandatory
                         setPrebidTargeting: ['adUnitCode1',...], // set target only on certain adunits 
-                        sendToBidders: ['appnexus',...], // overide, send to only some bidders
+                        sendToBidders: ['msft',...], // overide, send to only some bidders
                         enabled: true,
                     },
                     weboUserDataConf: {
@@ -535,7 +553,7 @@ pbjs.que.push(function () {
                         token: "to-be-defined", // mandatory
                         targetURL: "https://prebid.org", // default is document.URL
                         setPrebidTargeting: true, // override param.setPrebidTargeting or default true
-                        sendToBidders: ['appnexus',...], // overide, send to only some bidders
+                        sendToBidders: ['msft',...], // overide, send to only some bidders
                         defaultProfile: {         // optional
                             webo_ctx: ['moon'],
                             webo_ds: ['bar']
@@ -545,10 +563,10 @@ pbjs.que.push(function () {
                     },
                     weboUserDataConf: {
                         accountId: 12345,           // recommended
-                        setPrebidTargeting: true 
+                        setPrebidTargeting: ['adUnitCode1',...], // set target only on certain adunits 
                         sendToBidders: { // send to only some bidders and adunits
-                            'appnexus': true,               // enable appnexus 
-                            'pubmatic': false               // explicit disable pubmatic
+                            'msft': true,               // all adunits for msft 
+                            'pubmatic': ['adUnitCode1',...] // some adunits for pubmatic
                             // other bidders will be ignored
                         },
                         defaultProfile: {           // optional
@@ -560,9 +578,11 @@ pbjs.que.push(function () {
                         //, onData: function (data, ...) { ...}
                     },
                     sfbxLiteDataConf: {
-                        setPrebidTargeting: true,
+                        setPrebidTargeting: function(adUnitCode){ // specify set target via callback
+                            return adUnitCode == 'adUnitCode1';
+                        },
                         sendToBidders: function(bid, adUnitCode){ // specify sendToBidders via callback
-                            return bid.bidder == 'appnexus';
+                            return bid.bidder == 'msft' && adUnitCode == 'adUnitCode1';
                         }
                         defaultProfile: {           // optional
                             lite_occupation: ['gérant', 'bénévole'],
@@ -583,7 +603,7 @@ pbjs.que.push(function () {
 
 We currently support the following bidder adapters with dedicated code:
 
-* AppNexus SSP
+* Microsoft SSP
 
 We also set the bidder (and global, if no specific bidders are set on `sendToBidders`) ortb2 `site.ext.data` and `user.ext.data` sections (as arbitrary data). The following bidders may support it, to be sure, check the `First Party Data Support` on the feature list for the particular bidder from [here](https://docs.prebid.org/dev-docs/bidders).
 
@@ -625,7 +645,7 @@ We also set the bidder (and global, if no specific bidders are set on `sendToBid
 
 To view an example of available segments returned by Weborama's backends:
 
-`gulp serve --notest --nolint --modules=rtdModule,weboramaRtdProvider,smartadserverBidAdapter,pubmaticBidAdapter,appnexusBidAdapter,rubiconBidAdapter,criteoBidAdapter`
+`gulp serve --notest --nolint --modules=rtdModule,weboramaRtdProvider,smartadserverBidAdapter,pubmaticBidAdapter,msftBidAdapter,rubiconBidAdapter,criteoBidAdapter`
 
 and then point your browser at:
 

@@ -12,7 +12,10 @@ sbUUID: 3.2
 - TOC
 {: toc }
 
-There are several decisions you need to make as you’re planning out your Prebid implementation. The following diagram guides you through these decisions. Click on the boxes to navigate to detailed information about each one. (See below for an overview of these options.)
+{: .alert.alert-info :}
+This guide covers Prebid used as a **header bidding library**, where your ad server makes the final decision and needs line items for Prebid's bids. If you use Prebid as a **complete bidding library**, where your ad server (if any) bids into Prebid and Prebid chooses the winner, most of these steps (send all bids vs. top price, line item creation, price granularity) don't apply. See [The ad server bids into Prebid](/adops/ad-server-integration.html#the-ad-server-bids-into-prebid) instead.
+
+There are several decisions you need to make as you’re planning out your Prebid implementation as a header bidding library. The following diagram guides you through these decisions. Click on the boxes to navigate to detailed information about each one. (See below for an overview of these options.)
 
 <img src="/assets/images/ad-ops/planning/ad-ops-planning.png" alt="Ad Ops Decisions" usemap="#decisions">
 
@@ -33,7 +36,7 @@ As you go through the steps, we recommend that you document all your decisions. 
 
 An overview of the process of planning a Prebid integration for ad operations.
 
-<div style="padding:56.25% 0 0 0;margin: 1rem 0;position:relative;"><iframe src="https://player.vimeo.com/video/891677441?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Prebid Ad Operations Planning"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+{% include vimeo-iframe.html id="891677441" title="Prebid Ad Operations Planning" %}
 
 Notes:
 
@@ -45,7 +48,7 @@ Notes:
 
 We’ve presented the decision steps in what we believe is a logical order, but you can go in any order that makes sense to you and your implementation. Here is a brief overview of each step so you can decide where to start.
 
-[Ad Server Integration](/adops/ad-server-integration.html): Determine what type of support your ad server has for header bidding and whether you want to add that into your configuration.
+[Ad Server Integration](/adops/ad-server-integration.html): Decide whether Prebid works as a header bidding library, with your ad server making the final decision, or as a complete bidding library, with your ad server bidding into Prebid. Then determine what type of support your ad server has for that approach.
 
 [Send All Bids vs Top Price](/adops/send-all-vs-top-price.html): You can choose to send all bids that are received from header bidding demand partners, or send only the top bid. Learn the advantages and disadvantages of each.
 
@@ -62,6 +65,8 @@ Some additional resources that might be helpful as you work through your setup i
 [Prebid Universal Creative](/overview/prebid-universal-creative.html): Simplify your line item setup with the Prebid Universal Creative.
 
 [Deals in Prebid](/adops/deals.html): You can negotiate deals with header bidding demand partners and have them compete with ad server inventory. You’ll need to create additional line items to support these deals. This document explains how to set up Prebid to make that happen.
+
+[Prebid Mobile](/adops/mobile-adops.html): Read this if you have an app integration with Prebid Mobile.
 
 ## Terminology
 

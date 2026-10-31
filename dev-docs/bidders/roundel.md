@@ -5,6 +5,8 @@ description: Prebid Roundel Bidder Adapter
 biddercode: roundel
 aliasCode: ix
 pbjs: true
+enable_download: false
+pbjs_version_notes: "This alias is not currently registered by its Prebid.js module; specific reason unknown."
 pbs: true
 userIds: identityLink, netId, fabrickId, zeotapIdPlus
 pbs_app_supported: true
@@ -20,8 +22,8 @@ sidebarType: 1
 
 ## Overview
 
-Roundel is an aliased bidder for Index Exchange and must be configured alongside the [IdentityLink](/dev-docs/modules/userId.html#identitylink) user ID module.
+Roundel is an aliased bidder for Index Exchange and must be configured alongside the [RampID](/dev-docs/modules/userid-submodules/ramp.html) user ID module.
 
 ## Bid Params
 
-Bidder params for roundel follow the same structure as the Index Exchange bidder. Please reference configuration examples [here](/dev-docs/bidders/ix).
+Bidder params for roundel follow the same structure as the Index Exchange bidder. Please reference configuration examples [the related documentation](/dev-docs/bidders/ix).

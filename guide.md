@@ -3,7 +3,6 @@ layout: page_v2
 title: prebid.org website guide
 description: details about how the site works
 isNew: false
-
 sidebarType: 0
 ---
 
@@ -21,16 +20,14 @@ Updated Feb 9, 2023
 The easiest way to setup an environment to contribute to the docs or review pull requests is [Github Codespaces](https://github.com/features/codespaces).
 
 1. Open [github.com/prebid/prebid.github.io](https://github.com/prebid/prebid.github.io)
-2. Click on the `Code` drop down menu and select "create new codespace from master". If you have no access to prebid.github.io, then you should do this on your fork of the repository
-3. Install the [markdownlint extension](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint)
-    1. go to _Extensions_
-    2. search for _markdownlint_ and hit install
-    3. now you get direct feedback on linting errors
-4. Start the jekyll build as described in the `TERMINAL` of your codespace
-    1. `bundle install`
-    2. `JEKYLL_ENV=production bundle exec jekyll serve --watch --incremental`
-    3. Codespaces will display a notification to open the running instance in the browser.
-5. In the `PORTS` tab you find the running instance
+2. Click on the `Code` drop down menu and select "create new codespace from master" by clicking on the + icon. 
+   If you have no access to prebid.github.io, then you should do this on your fork of the repository
+3. Start the jekyll build as described in the `TERMINAL` of your codespace
+    1. `JEKYLL_ENV=production bundle exec jekyll serve --watch --incremental`
+    2. Codespaces will display a notification to open the running instance in the browser.
+4. In the `PORTS` tab you find the running instance
+
+This repository contains a [devcontainer.json](https://github.com/prebid/prebid.github.io/blob/master/.devcontainer/devcontainer.json) that setups the codespace or your favourite IDE. It includes the [markdownlint extension](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint), ruby and installs all dependency on setup through `bundle install`.
 
 ## Reviewing Pull Requests and Issues
 
@@ -39,16 +36,21 @@ Being a reviewer means you're in weekly rotation where you keep an eye on pull r
 ### PR Review Guidelines
 
 1. Make sure no inappropriate changes are made. This covers obvious things like bad language and content, but we also don't allow overt marketing language on the site. Phrases like "we're the best BLAH" or "number one FOOZIT" need to be toned down.
-2. Make sure competitors aren't messing with each other's docs. This can be hard to tell because we don't know which github handles belong to which companies, but in general, if a destructive or suspicious change is being made to a doc, check on the Prebid Slack channel to confirm that the affected company approves the change.
+2. Make sure competitors aren't messing with each other's docs. This can be hard to tell because we don't know which github handles belong to which companies, but in general, if a destructive or suspicious change is being made to a doc, check on the Prebid Slack channel or the original github author to confirm that the affected company approves the change.
 3. Make sure the change doesn't break formatting. It's not always necessary to preview locally, but for large changes, it's worthwhile verifying visually because markdown can be cranky.
 4. Help the author with basic readability - if you as a reviewer don't understand a sentence, probably others will have trouble too. Push back and ask questions about what they're really trying to say.
-5. We don't generally merge a docs PR until the related code is released. Prebid.js releases happen on Weds or Thurs, and people really like to have their docs PRs merged shortly after the code is released. For Prebid Server, it's ok to merge the docs after the code is merged.
+5. We don't generally merge a docs PR until the related code is released. Prebid.js releases happen on Weds or Thurs, and people really like to have their docs PRs merged shortly after the code is released. For Prebid Server, it's ok to merge the docs after the code is merged. If they don't link a code PR, you can go search for it or just ask them to provide a link.
 6. Fix broken or out-of-date things you run across. At least flag it in the team slack channel so we can fix it someday.
 7. Bid Adapter Guidelines
-    1. Check the front-matter: required fields are title and either pbjs or pbs.
+    1. Check the metadata (aka front-matter): required fields are title and either pbjs or pbs, but in general, the adapter should supply at least half of the available fields. If they don't you should add a "request changes" note like "This document is missing quite a few pieces of adapter metadata. Please fill out the metadata as documented at [https://docs.prebid.org/dev-docs/bidder-adaptor.html#submitting-your-adapter](https://docs.prebid.org/dev-docs/bidder-adaptor.html#submitting-your-adapter)"
     2. Every adapter needs a parameters table that contains exactly 5 columns in this order: Name, Scope, Description, Example, Type.
     3. Discourage full-page HTML examples. Better to have just the bidder-specific logic and a pointer to a standard Prebid.js example.
     4. All headers must be level 3, 4, or 5.
+    5. As for the `media_types` metadata, if they don't support display, then the need to define "no-display". This is because the default metadata table in pbs-bidders.md assumes everyone supports display.
+    6. If they claim `tcfeu_support: true`, they must also supply a `gvl_id`. You should check on the [TCF vendor list](https://vendor-list.consensu.org/v3/vendor-list.json) that the GVL ID supplied makes sense. If it's an alias they may define the GVL ID like this: `gvl_id: 14 (adkernel)`
+    7. Don't let them claim both pbjs and pbs if they don't have both a Prebid.js and Prebid Server adapter. It's ok to have either a PBS-Go or PBS-Java adapter.
+    8. They cannot claim `fpd_supported` unless the body of their documentation has a section describing how exactly they support First Party Data. You can reject this with a note like "Sorry - you can't claim FPD support unless the document has a description of what kind of First Party data. See the [http://docs.prebid.org/dev-docs/bidder-adaptor.html#submitting-your-adapter](http://docs.prebid.org/dev-docs/bidder-adaptor.html#submitting-your-adapter). We recommend looking at how other adapters have done this. e.g. you can declare that you support site first party data, user first party data, impression-level data, seller-define audience, etc."
+    9. If they claim to be a `prebid_member`, you can check that on the [prebid.org membership page](https://prebid.org/member-directory/)
 
 ## Core Technologies
 
@@ -60,7 +62,7 @@ Learn more about [Markdown](https://www.markdownguide.org/)
 
 **Bootstrap**: A CSS template for responsive site design. Bootstrap provides the base formatting for the site.
 
-Learn more about [Bootstrap](https://getbootstrap.com/docs/4.1/getting-started/introduction/_)
+Learn more about [Bootstrap](https://getbootstrap.com/docs/4.1/getting-started/introduction/)
 
 **Liquid**: A language created by Shopify to enable dynamic HTML creation.
 
@@ -96,7 +98,7 @@ For the Prebid.org site the following directories are used:
 **_data**  
 Jekyll was originally designed specifically for creation of blogging websites and not for dynamic, data-driven sites. However, by including the _data directory we can mimic a database structure to create a more robust site. Files in this directory can be saved in either _json_, _yml_ or _csv_ format. For Prebid.org they have been saved in _yml_.
 
-Learn more about YML [here](https://yaml.org/start.html)
+Learn more about [YAML](https://yaml.org/)
 
 There are several YML files in the Prebid _data directory
 
@@ -128,20 +130,20 @@ The sites directory is created by Jekyll. It contains the live site generated fr
 
 The assets directory contains the CSS, Javascript, images and other assets used to create the site.
 
-The base CSS file used is Bootstrap (version 4.6.3) Custom CSS and modifications to Bootstrap classes are contained in the [_sass/vendor/_bootstrap.scss](_sass/vendor/_bootstrap.scss) file.
+The base CSS file used is Bootstrap (version 4.6.3) Custom CSS and modifications to Bootstrap classes are contained in the [_sass/vendor/_bootstrap.scss](https://github.com/prebid/prebid.github.io/blob/master/_sass/vendor/_bootstrap.scss) file.
 
 The JS directory contains the Javascript files required for the Prebid.org site. It includes JQuery and Bootstrap javascript frameworks as well as other third party libraries and custom javascript written specifically for the Prebid site. For JQuery and Bootstrap both the expanded and minified versions of the javascript files are included but only the minified files are linked from the site header.
 
 ### CSS
 
 1. Styles all come from `/assets/css/main-bundle.scss`
-1. These are generated from [_sass/main.scss](_sass/main.scss)
+1. These are generated from [_sass/main.scss](https://github.com/prebid/prebid.github.io/blob/master/_sass/main.scss)
 1. To make a change, edit the relevant sass file
 
 If you want to upgrade bootstrap
 
-1. Upgrade bootstrap in the [package.json](package-lock)
-1. Run `npm install`. This will update the node_modules commited in [_sass/node_modules](_sass/node_modules)
+1. Upgrade bootstrap in the [package.json](https://github.com/prebid/prebid.github.io/blob/master/package.json)
+1. Run `npm install`. This will update the node_modules commited in [_sass/node_modules](https://github.com/prebid/prebid.github.io/blob/master/_sass/node_modules)
 1. Commit the updated node module source files
 
 ## Data Models
@@ -185,19 +187,19 @@ Each menu item is represented in the YML map as a collection of key value pairs 
 The collection with the title property "What Is Prebid?" is a child of the collection directly above it with the sectionName "Overview"
 
 **Top Nav Menu Collection Properties**  
-*Note: A collection does not have to contain all properties. For Bools 1 = true, 0 = false*
+_Note: A collection does not have to contain all properties. For Bools 1 = true, 0 = false_
 
 | Key | Type | Example | Use |
-| ------ | ------ | ------ | ------ |
-| sectionId| Int | 3 | Indicates the menu section of an item. |
-| sectionName |  string | Overview  | The display name of the section. |
-| link |  string | /overview/intro.html  | The relative link that the menu item should open. |
+| --- | --- | --- | --- |
+| sectionId | Int | 3 | Indicates the menu section of an item. |
+| sectionName | string | Overview | The display name of the section. |
+| link | string | /overview/intro.html | The relative link that the menu item should open. |
 | isHeader | bool | 1 | Indicates if this item is a section header. |
 | hasSubMenus | bool | 1 | Indicates if this item has submenus. |
 | submenus | collection | | If the item has submenus they will be contained in a collection of collections. |
 | subsectionId | int | 3 | Indicates the subsection of an item. |
 | needsDivider | bool | 0 | Indicates if the subsection item is the last item in the section and requires a divider. **Deprecated** |
-| isSubsectionStart  | bool | 0 | Indicates if the item is the start of a subsection. **Deprecated** |
+| isSubsectionStart | bool | 0 | Indicates if the item is the start of a subsection. **Deprecated** |
 
 **Code Use**  
 This data file is read in the nav.html file using Liquid. (_`_includes/nav.html`).
@@ -243,21 +245,21 @@ Each menu item is represented in the YML map as a collection of key value pairs 
   ```
 
 **Side Nav Menu Collection Properties**  
-*Note: A collection does not have to contain all properties. For bools 1 = true, 0 = false**
+_Note: A collection does not have to contain all properties. For bools 1 = true, 0 = false_*
 
 | Key | Type | Example | Use |
-| ----- | ----- | ----- | ----- |
-| sbSecId |  int | 3  | Indicates the menu section of an item. |
-| title  |  string | General  | The text displayed for the menu section. |
-| link |  string | /overview/intro.html  | The relative link that the menu item opens. |
-| isLastSubSectionItem  |  bool | 0  | Indicates if the menu item is the last item in a subsection. |
-| isHeader |  bool | 0  | Indicates if the menu item is a sub section header. |
-| headerId |  string | general  | Required if isHeader = 1. Used to identify which div object is being toggled. |
-| isSectionHeader |  bool | 0  | Indicates if the menu item is a section header. |
-| sectionTitle |  string | Overview  | Text displayed for the section. |
-| sectionId |  string | overview  | Required if isHeader = 1. Used to identify which div object is being toggled. |
-| subgroup |  int | 3  | Indicates the subgroup that contains this item. |
-| sbCollapseId |  string | overview  | Required if isSectionHeader = 1. Used to identify which div object is being toggled. |
+| --- | --- | --- | --- |
+| sbSecId | int | 3 | Indicates the menu section of an item. |
+| title | string | General | The text displayed for the menu section. |
+| link | string | /overview/intro.html | The relative link that the menu item opens. |
+| isLastSubSectionItem | bool | 0 | Indicates if the menu item is the last item in a subsection. |
+| isHeader | bool | 0 | Indicates if the menu item is a sub section header. |
+| headerId | string | general | Required if isHeader = 1. Used to identify which div object is being toggled. |
+| isSectionHeader | bool | 0 | Indicates if the menu item is a section header. |
+| sectionTitle | string | Overview | Text displayed for the section. |
+| sectionId | string | overview | Required if isHeader = 1. Used to identify which div object is being toggled. |
+| subgroup | int | 3 | Indicates the subgroup that contains this item. |
+| sbCollapseId | string | overview | Required if isSectionHeader = 1. Used to identify which div object is being toggled. |
 
 **Code Use**  
 This data file is read in the left_nav.html file using Liquid. (__includes/left_nav.html)
@@ -272,6 +274,74 @@ In certain cases, it is helpful to the user to highlight a page in the left navi
 
 This has been done for both bidders pages (pages with `layout: bidder`) and the Publisher API Reference (`layout: api_prebidjs` and highlighting Prebid.js > Reference > Publish API Reference in the left nav), but can be extended to other pages as needed.
 
+### Disclosure Includes
+
+The docs offer a set of predefined disclosures that should be used where appropriate.
+
+#### Module does fingerprinting
+
+{% include dev-docs/fingerprinting.md %}
+
+```liquid
+{%raw%}{% include dev-docs/fingerprinting.md %}{%endraw%}
+```
+
+### Module loads external javascript
+
+{% include dev-docs/loads-external-javascript.md %}
+
+```liquid
+{%raw%}{% include dev-docs/loads-external-javascript.md %}{%endraw%}
+```
+
+#### Prebid Server works only with client-side adapter available
+
+{% include dev-docs/pbjs-adapter-required-for-pbs.md %}
+
+```liquid
+{%raw%}{% include dev-docs/pbjs-adapter-required-for-pbs.md %}{%endraw%}
+```
+
+#### Example uses build from source
+
+{% include dev-docs/build-from-source-warning.md %}
+
+```liquid
+{%raw%}{% include dev-docs/build-from-source-warning.md %}{%endraw%}
+```
+
+#### Example uses not for production assets
+
+{% include dev-docs/not-for-production-warning.md %}
+
+```liquid
+{%raw%}{% include dev-docs/not-for-production-warning.md %}{%endraw%}
+```
+
+#### Legal disclosure
+
+{% include legal-warning.html %}
+
+```liquid
+{%raw%}{% include legal-warning.html %}{%endraw%}
+```
+
+#### Vendor exception disclosure
+
+{% include dev-docs/vendor-exception.md %}
+
+```liquid
+{%raw%}{% include dev-docs/vendor-exception.md %}{%endraw%}
+```
+
+You can also add a `gvlId` parameter if the vendor has in fact an ID.
+
+{% include dev-docs/vendor-exception.md gvlId="123" %}
+
+```liquid
+{%raw%}{% include dev-docs/vendor-exception.md gvlId="123" %}{%endraw%}
+```
+
 ## Partners
 
 TBD
@@ -280,13 +350,15 @@ TBD
 
 There are 200+ bidder files in the /dev-docs/bidders directory describing the parameters for each Prebid.js bidder. There are two unfortunately identical pieces of code that process them:
 
-- /\_layouts/bidder.html - this is used to generate the single-bidder version of the page like <https://prebid.org/dev-docs/bidders/rubicon.html>
-- /dev-docs/bidders.md - this is used to generate the (large) combined page at <https://prebid.org/dev-docs/bidders.html>
+- /\_layouts/bidder.html - this is used to generate the single-bidder version of the page like <https://docs.prebid.org/dev-docs/bidders/rubicon.html>
+- /dev-docs/bidders.md - this is used to generate the (large) combined page at <https://docs.prebid.org/dev-docs/bidders.html>
 
 The attributes in the Jekyll 'front matter' drive various behaviors and dynamic tables elsewhere on the site.
 
+{: .table .table-bordered .table-striped }
+
 | Key | Required? | Values | Use |
-| ----- | ------ | ------ | ------ |
+| --- | --- | --- | --- |
 | layout | yes | bidder | Links this file to the bidder.html layout |
 | title | yes | company name | For display |
 | pbjs | sorta | true or false | defines whether this is a Prebid.js bidder |
@@ -297,7 +369,7 @@ The attributes in the Jekyll 'front matter' drive various behaviors and dynamic 
 | filename | no | bid adapter that actually implements this adapter | Used when a bid adapter is created with a filename that is not the bidder code. This completely overrides what is passed into the gulp build command, so needs to be fully specified. e.g. bidderaBidAdapter |
 | prevBiddercode | no | secondary bidder code | Adds a note about an alternate code that may have been used. |
 | pbjs_version_notes | no | string | Displays on the download page |
-| sidebarType | yes | `1` | Used for navigation. This opens the Prebid.js portion of the menu so the sidebar can display the Reference/Prebid Params menu option when a bidder page is open.
+| sidebarType | yes | `1` | Used for navigation. This opens the Prebid.js portion of the menu so the sidebar can display the Reference/Prebid Params menu option when a bidder page is open. |
 | ANYTHING ELSE | no | string | There are many pieces of metadata (e.g. GDPR support, user IDs supported) that bid adapters can disclose. They're displayed on the bidder's parameter page. |
 
 The bidderCode, aliasCode, and prevBiddercode parameters bear some description.
@@ -312,28 +384,20 @@ with a prefix like `hb_cache_host`. So they wanted to have shorter bidderCode fo
 4. optionally add prevBiddercode to add a note to the page about the legacy value
 5. optionally add filename if the bid adapter was created using a filename that's different than their bidder code. e.g. if the biddercode is "biddera" but they named the file "bidderABidAdapter", set the biddercode to "biddera" and the filename to "bidderABidAdapter".
 
-## Algolia Search
+## Site Search
 
-We use Algolia for site search.
+We use [Pagefind](https://pagefind.app/) for site search. It indexes the built site after `jekyll build`, in the deploy workflow (`.github/workflows/pages-deploy.yml`).
 
-- The configuration defining the search parameters is at <https://github.com/algolia/docsearch-configs/blob/master/configs/prebid.json>
-- Only elements p, th, td, li, code, and h1-h3 are indexed
-- Code implementation in _includes/body-end.html and a the 'site-search' div in the header.
+- Only the `.pb-content` area of each layout is indexed (`data-pagefind-body`, from `_includes/pagefind-body.html`), which also sets the `section` filter shown in the search modal.
+- Pages without an `<h1>` in their content get their title as a weighted, hidden heading and as the result title (`_includes/pagefind-title.html`).
+- The search trigger and modal are added by the script in `_includes/head--common.html`, from the template in `_includes/nav.html`.
+- To try search locally, see [Running Jekyll Locally](https://github.com/prebid/prebid.github.io#running-jekyll-locally) in the README.
 
 ## Cookie Privacy
 
-Prebid websites don't set their own cookies, but vendor products we use do. So we use the OneTrust CookiePro library to pop up a cookie banner. If the user hasn't consented to setting cookies, they will find reduced functionality on the site -- they won't be able to view JSFiddle examples or example videos.
+Prebid websites don't set their own cookies, but vendor products we use do. So we use the consentmanager.net to pop up a cookie banner. If the user hasn't consented to setting cookies, they will find reduced functionality on the site -- they won't be able to view JSFiddle examples or example videos.
 
-This is implemented with the [OneTrust](https://community.cookiepro.com/s/article/UUID-730ad441-6c4d-7877-7f85-36f1e801e8ca?language=en_US) library. See layout/example.md for how the OneTrust.InsertHtml function is used.
-The last argument to that function is the "group id", which declares what kind of cookies this vendor script is
-going to set. Here's how OneTrust defines the groups:
-
-1. Strictly Necessary cookies
-2. Performance cookies
-3. Function cookies
-4. Targeting cookies
-
-OneTrust categorizes cookies on their own, and it seems pretty random to us. Our guideline is to define tools as group 3 for small trusted vendors, or group 4 for large vendors that probably have a database of users.
+This is implemented with the [consentmanager third party blocking feature](https://help.consentmanager.net/books/cmp/page/how-to-block-third-party-codes-cookies-if-no-consent-is-given). See layout/example.md for an example implementation.
 
 The test case for vendor code that drops cookies is simple:
 

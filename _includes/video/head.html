@@ -3,11 +3,9 @@
 
 <head>
 {% include head--common.html %}
+{% include prebidjs-non-prod.html %}
 
-    <!--production version of prebid.js-->
-    <script async src="//cdn.jsdelivr.net/npm/prebid.js@latest/dist/not-for-prod/prebid.js"></script>
-    <script type="text/javascript" src="//services.brid.tv/player/build/brid.min.js"></script>
-
+<script type="text/plain" class="cmplazyload" data-cmp-purpose="c51" src="//services.brid.tv/player/build/brid.min.js"></script>
     <script type="text/javascript">
 
     	var videoType = "{{page.videoType}}";
@@ -35,9 +33,9 @@
 			  },
 			  bids: [
 			    {
-			      bidder: 'appnexusAst',
+			      bidder: 'msft',
 			      params: {
-			        placementId: '13232361', // Add your own placement id here
+			        placement_id: '13232361', // Add your own placement id here
 			        video: {
 			          skipppable: true,
 			          playback_method: ['auto_play_sound_off']
@@ -56,7 +54,7 @@
 
 			  pbjs.requestBids({
 			      bidsBackHandler: function(bids) {
-			          var videoUrl = pbjs.adServers.dfp.buildVideoUrl({
+			          var videoUrl = pbjs.adServers.gam.buildVideoUrl({
 			              adUnit: videoAdUnit,
 			              params: {
 			                  iu: '/19968336/prebid_cache_video_adunit',

@@ -5,11 +5,14 @@ title: Module - topicsFpdModule
 description: how to get topics data using Topics API
 module_code : topicsFpdModule
 display_name : Topics FPD Module
-enable_download : true
+enable_download : false
 sidebarType : 1
 ---
 
 # Topics First Party Data (FPD) Module
+
+{: .alert.alert-warning :}
+Chrome has removed the Topics API. Since Prebid.js 11.26, this module is a no-op: it logs a warning, adds no topics to `user.data`, and loads no topics iframes. The `userSync.topics` configuration described below is ignored. The rest of this page describes the module as it worked before 11.26.
 
 This module is use to call the Topics API (document.browsingTopics()) which will fetch the first party domain as well third party domain(Iframe) topics data which will be sent onto user.data in bid stream.
 
@@ -55,15 +58,34 @@ pbjs.setConfig({
     userSync: {
         // ...,
         topics: { 
-            maxTopicCaller: 3, // SSP rotation 
+            maxTopicCaller: 4,
             bidders: [{
                 bidder: 'pubmatic',
-                iframeURL: 'https://ads.pubmatic.com/AdServer/js/topics/topics_frame.html',
-                expiry: 7 // Configurable expiry days
-            },{
-                bidder: 'appnexus',
-                iframeURL: 'https://appnexus.com:8080/topics/fpd/topic.html', // dummy URL
-                expiry: 7 // Configurable expiry days
+                iframeURL: 'https://ads.pubmatic.com/AdServer/js/topics/topics_frame.html'
+            }, {
+                bidder: 'rtbhouse',
+                iframeURL: 'https://topics.authorizedvault.com/topicsapi.html'
+            }, {
+                bidder: 'openx',
+                iframeURL: 'https://pa.openx.net/topics_frame.html'
+            }, {
+                bidder: 'improvedigital',
+                iframeURL: 'https://hb.360yield.com/privacy-sandbox/topics.html'
+            }, {
+                bidder: 'onetag',
+                iframeURL: 'https://onetag-sys.com/static/topicsapi.html'
+            }, {
+                bidder: 'taboola',
+                iframeURL: 'https://cdn.taboola.com/libtrc/static/topics/taboola-prebid-browsing-topics.html'
+            }, {
+                bidder: 'discovery',
+                iframeURL: 'https://api.popin.cc/topic/prebid-topics-frame.html'
+            }, {
+                bidder: 'undertone',
+                iframeURL: 'https://creative-p.undertone.com/spk-public/topics_frame.html'
+            }, {
+                bidder: 'vidazoo',
+                iframeURL: 'https://static.vidazoo.com/topics_api/topics_frame.html'
             }]
         }
         // ...
@@ -77,7 +99,7 @@ pbjs.setConfig({
 | Field | Required? | Type | Description |
 | --- | --- | --- | --- |
 | topics.maxTopicCaller | no | integer | Defines the maximum numbers of Bidders Iframe which needs to be loaded on the publisher page. Default is 1 which is hardcoded in Module. Eg: topics.maxTopicCaller is set to 3. If there are 10 bidders configured along with their iframe URLS, random 3 bidders iframe URL is loaded which will call TOPICS API. If topics.maxTopicCaller is set to 0, it will load random 1(default) bidder iframe atleast. |
-| topics.bidders | no | Array of objects  | Array of topics callers with the iframe locations and other necessary informations like bidder(Bidder code) and expiry. Default Array of topics in the module itself.|
-| topics.bidders[].bidder | yes | string  | Bidder Code of the bidder(SSP).  |
-| topics.bidders[].iframeURL | yes | string  | URL which is hosted on bidder/SSP/third-party domains which will call Topics API.  |
-| topics.bidders[].expiry | no | integer  | Max number of days where Topics data will be persist. If Data is stored for more than mentioned expiry day, it will be deleted from storage. Default is 21 days which is hardcoded in Module. |
+| topics.bidders | no | Array of objects | Array of topics callers with the iframe locations and other necessary informations like bidder(Bidder code) and expiry. Default Array of topics in the module itself. |
+| topics.bidders[].bidder | yes | string | Bidder Code of the bidder(SSP). |
+| topics.bidders[].iframeURL | yes | string | URL which is hosted on bidder/SSP/third-party domains which will call Topics API. |
+| topics.bidders[].expiry | no | integer | Max number of days where Topics data will be persist. If Data is stored for more than mentioned expiry day, it will be deleted from storage. Default is 21 days which is hardcoded in Module. |

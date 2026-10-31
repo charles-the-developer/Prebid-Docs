@@ -5,11 +5,15 @@ description: A video overview of Prebid.js Components
 sidebarType: 1
 ---
 
+<div style="text-align: center;">
+  <img src="/assets/images/logos/prebid-js-logo.png" alt="Prebid.js Logo" width="500" height="80" style="max-width: 100%; height: auto;" />
+</div>
+
 # A Video Overview of Prebid.js Components
 
 An explanation of Prebid.js’ components and a guide to using Prebid.js reference documentation.
 
-<div style="padding:56.25% 0 0 0;margin: 1rem 0;position:relative;"><iframe src="https://player.vimeo.com/video/826314008?h=ec9fad7080&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Components of Prebid.js"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+{% include vimeo-iframe.html id="826314008" title="Components of Prebid.js" %}
 
 Further Content:
 

@@ -14,6 +14,7 @@ the [GitHub releases page](https://github.com/prebid/Prebid.js/releases) can be 
 The table below is a summary of feature changes and important bug fixes in core of Prebid.js. Almost [all releases](https://github.com/prebid/Prebid.js/releases) have new bid adapters or updates to existing adapters -- what's listed here is limited to core functionality. Releases with only minor core changes may not be shown here, and releases with multiple important changes may be shown more than once.
 
 {: .table .table-bordered .table-striped }
+
 | Release | Feature |
 | --- | --- |
 | 8.0 | Module removals, reliabe (opt-in) transaction identifier, size mapping module & acitivy control. See the [PBJS 8 release notes](/dev-docs/pb8-notes.html) |
@@ -25,7 +26,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 5.0 | See [Prebid.js 5.0 blog](https://prebid.org/blog/prebid-5-0-release/) |
 | 4.43 | Support [allowSendAllBidsTargetingKeys](/dev-docs/publisher-api-reference/setConfig.html#setConfig-targetingControls) option for control over which keys are sent to the ad server |
 | 4.41 | Support [suppressStaleRender](/dev-docs/publisher-api-reference/setConfig.html#auction-options) option |
-| 4.40 | First Party Data [enrichment](/dev-docs/modules/enrichmentFpdModule.html) and [validation](/dev-docs/modules/validationFpdModule.html) modules are introduced |
+| 4.40 | First Party Data enrichment and [validation](/dev-docs/modules/validationFpdModule.html) modules are introduced |
 | 4.39 | Prebid Core: removed size check on native icons and image assets |
 | 4.38 | PBS Bid Adapter allows stored impression configuration |
 | 4.37 | PBS bid adapter adds support for non-purpose1 consent domains |
@@ -33,7 +34,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 4.35 | Introduced pbjs.pbjs.getHighestUnusedBidResponseForAdUnitCode function |
 | 4.34 | Bug fix: canBidderRegisterSync ignoring iframe sync disabled by default |
 | 4.33 | [MultiBid Module](/dev-docs/modules/multibid.html) |
-| 4.32 | [MASS Module](/dev-docs/modules/mass.html) introduces a custom deal render approach |
+| 4.32 | MASS Module introduces a custom deal render approach (removed in 8.0, see [Custom Rendering for Deals](/features/customDealRendering.html)) |
 | 4.31 | PBS Bid Adapter: FPD2.0 bug fix for first party data issue |
 | 4.30 | [First Party Data 2.0](/features/firstPartyData.html) changed to `ortb2`, added demand chain object to PBS Bid Adapter |
 | 4.29 | PBS Bid Adapter: cooperative sync flag |
@@ -56,7 +57,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 4.4 | DFP Video Module supports VAST 4 |
 | 4.3 | DFP Video Module bug fixed |
 | 4.1.1 | Release of the [GPT Pre-Auction Module](https://docs.prebid.org/dev-docs/modules/gpt-pre-auction.html). Price Floors: new signals (location: noData + floorProvider) |
-| 4.0 | TCF Purpose 1 and Purpose 2 enforced by default when GDPR enforcement module turned on. Removed Digitrust userId module. Removed audienceNetworkBidAdapter. |
+| 4.0 | TCF Purpose 1 and Purpose 2 enforced by default when GDPR enforcement (now TCF Control) module turned on. Removed Digitrust userId module. Removed audienceNetworkBidAdapter. |
 | 3.27.1 | DFP Video Module bug fixed |
 | 3.27 | An important bug in the DFP Video Module was introduced with this release and fixed in 4.3 and 3.27.1. The dfpVideoModule only looked in adunit.sizes but adunit.sizes was stripped. Unfortunately there's not a workaround - if you use that video module, you shouldn't use Prebid.js 3.27 through 4.2 inclusive. |
 | 3.24 | PBS Bid Adapter allows setting site params |
@@ -66,7 +67,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 3.17 | UserID module also exports IDs as eids |
 | 3.16 | isSafariBrowser fixed for Chrome and Firefox on iOS |
 | 3.15 | Advanced Size Mapping module support adunits of the same name |
-| 3.14 | New [GDPR enforcement module](/dev-docs/modules/gdprEnforcement.html) supports enforcing Purpose 1 - DeviceAccess |
+| 3.14 | New [GDPR enforcement module](/dev-docs/modules/tcfControl.html) (now TCF Control) supports enforcing Purpose 1 - DeviceAccess |
 | 3.13 | GDPR module supports defaultGdprScope option |
 | 3.12 | Initial support for TCF2 - reading and passing consent strings, added [DeviceAccess](/dev-docs/publisher-api-reference/setConfig.html#setConfig-deviceAccess) configuration setting |
 | 3.11 | [Advanced Size Mapping module](/dev-docs/modules/sizeMappingV2.html) |
@@ -75,7 +76,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 3.3 | [Prebid Ad Slot](/features/pbAdSlot.html) support |
 | 3.2 | [Bidder-specific Supply Chain](/dev-docs/modules/schain.html#bidder-specific-supply-chains) support, added [static API option](/dev-docs/modules/consentManagementUsp.html) to the CCPA/USP module |
 | 3.1 | pbsBidAdapter: fix for handling response currency |
-| 3.0 | [Prebid.js 3.0](https://prebid.org/blog/pbjs-3) |
+| 3.0 | [Prebid.js 3.0](https://github.com/prebid/Prebid.js/releases/tag/3.0.0) |
 | 2.44 | Stopped duplicate alias user syncs |
 | 2.43 | [US Privacy/CCPA Consent Module](/dev-docs/modules/consentManagementUsp.html) |
 | 2.39 | Made originalCpm and originalCurrency fields in bid object always available |
@@ -95,7 +96,7 @@ The table below is a summary of feature changes and important bug fixes in core 
 | 2.10 | [User ID module](/dev-docs/modules/userId.html) released with support for PubCommon ID and Unified ID |
 | 2.10 | A bidder which responded in time is now considered a timely bidder, even if it responded with no bids. See [PR 3696](https://github.com/prebid/Prebid.js/pull/3696) |
 | 2.9 | Add 'hb_cache_host' targeting for video bids when cache is set to support upcoming video cache redirector |
-| 2.9 | remove removeRequestId logic. See [PR 3698](https://github.com/prebid/Prebid.js/pull/3698)
+| 2.9 | remove removeRequestId logic. See [PR 3698](https://github.com/prebid/Prebid.js/pull/3698) |
 | 2.8 | Added [s2sConfig](/dev-docs/publisher-api-reference/setConfig.html#setConfig-Server-to-Server) `syncUrlModifier` option to modify userSync URLs |
 | 2.8 | Add hb_uuid and hb_cache_id back to dfp module after having been removed in 2.7 |
 | 2.6 | Update auction algorithm logic for long-form. See [PR 3625](https://github.com/prebid/Prebid.js/pull/3625) |

@@ -5,11 +5,12 @@ description: Prebid Index Exchange Bidder Adapter
 biddercode: ix
 pbjs: true
 pbs: false
-userIds: identityLink, netId, fabrickId, zeotapIdPlus, uid2, unifiedId, id5Id, lotamePanoramaId, publinkId, hadronId, pubcid, imuid, 33acrossId, nonID
+userIds: amazonAdvertisingID, fabrickId, zeotapIdPlus, TDID, tpid, id5Id, lotamePanoramaId, publinkId, hadronId, pubcid, trustpid, utiqMtpId, criteoID, euid, imuid, 33acrossId, nonID, pairId, M1ID, RampID, connectId
 pbs_app_supported: true
 schain_supported: true
 coppa_supported: true
 tcfeu_supported: true
+dsa_supported: true
 floors_supported: true
 usp_supported: true
 gpp_supported: true
@@ -37,7 +38,8 @@ privacy_sandbox: paapi, topics
   * [Global data](#prebid-fpd-module)
   * [Index bidder-specific data](#index-bidder-specific-fpd-module)
   * [AdUnit-specific data](#adunit-specific-data)
-* [Index's outstream video player](#index-outstream-video-player)
+* [Monetize instream video](#monetize-instream-video)
+* [Index's outstream ad unit](#indexs-outstream-ad-unit) 
 * [Prebid Native configuration](#prebid-native-configuration)
 * [Protected Audience API support](#protected-audience-api-support)
 * [Signal inventory using  external IDs](#signal-inventory-using-external-ids)
@@ -67,7 +69,9 @@ Publishers can use Prebid.js to call Index Exchange (Index) in any of the follow
   * In the **Network** tab, search for requests sent to `casalemedia.com/cygnus` (from version 6.28.0 and earlier) or `casalemedia.com/openrtb/pbjs` (from version 6.29.0 and later). These are the bid requests sent to Index.
 * **Recommended Global Bidder settings:** For our adapter, Index recommends enabling local storage. As of Prebid.js 7.x, local storage access must be explicitly specified. By leveraging local storage, Index is able to take advantage of the latest features our exchange has to offer. For instructions on enabling local storage, see Prebid’s [pbjs.bidderSettings](/dev-docs/publisher-api-reference/bidderSettings.html) documentation.
 
-### Example
+{% include dev-docs/storageAllowed.md %}
+
+## Example
 
 ```javascript
 pbjs.bidderSettings = { 
@@ -77,25 +81,23 @@ pbjs.bidderSettings = {
 };
 ```
 
-<a id="supported-media-types"></a>
-
 ## Supported media types
 
 The following table lists the media types that Index supports. For information about the the Time-To-Live (TTL) for each media type, see [How Index counts impressions](https://kb.indexexchange.com/publishers/billing/how_Index_counts_impressions.htm) in our Knowledge Base.
 
 {: .table .table-bordered .table-striped }
 
-| Type      | Prebid Server support |
-| ----------- | ----------- |
-| banner      | Supported       |
-| video   | Supported      |
-| native      | Supported       |
+| Type | Prebid Server support |
+| --- | --- |
+| banner | Supported |
+| video | Supported |
+| native | Supported |
 
 <a id="client-side-adapter"></a>
 
 ## Set up Prebid.js to call Index directly from the browser (client-side adapter)
 
-To call Index from a web browser environment using a Prebid Server integration, see the Index-specific configuration steps in [Setup instructions to call Index through Prebid Server](/dev-docs/bidders/ix-server.html#setup-instructions-to-call-index-through-prebid-server) in our Prebid Server documentation on the Prebid site.
+To call Index from a web browser environment using a Prebid Server integration, see the Index-specific configuration steps in [Setup instructions to call Index through Prebid Server](/dev-docs/bidders/ix-server.html#call-index-from-a-web-browser) in our Prebid Server documentation on the Prebid site.
 
 <a id="server-side-adapter"></a>
 
@@ -103,7 +105,7 @@ To call Index from a web browser environment using a Prebid Server integration, 
 
 In this configuration, Prebid.js makes a call to Prebid Server and then Prebid Server uses our server-side adapter to call Index. Complete the following steps to configure Index as a demand source:
 
-1. If you are hosting your own Prebid Server instance, see [Setup instructions to call Index through Prebid Server](/dev-docs/pbs-bidders.html#setup-instructions-to-call-index-through-prebid-server).
+1. If you are hosting your own Prebid Server instance, see [Setup instructions to call Index through Prebid Server](/dev-docs/bidders/ix-server.html#configure-the-index-adapter-in-your-prebid-server-instance).
 2. In the `[pbjs.setConfig()]` function, within the `s2sConfig` property, add `ix` to the `bidders` attribute.
 3. Define the Index-specific parameters at the bidder level. For Index's bidder-specific parameters, see the [Bid request parameters](#bid-request-parameters) section below.
 4. Define your ad units in the `adUnit` object. For more information about this object, see Prebid's [Ad Unit Reference](/dev-docs/adunit-reference.html) documentation.
@@ -124,18 +126,9 @@ In this configuration, Prebid.js makes a call to Prebid Server and then Prebid S
     ```
 
 6. (Optional) Set up First Party Data (FPD). For more information about the data types we support and the instructions for each option, see the [Set up First Party Data (FPD)](#set-up-first-party-data-fpd) section below.
-7. (Optional) If you want to monetize instream video, you need to enable a cache endpoint in the `[pbjs.setConfig()]` function as follows:
-
-    ```javascript
-    pbjs.setConfig({
-        cache: {
-                url: 'https://prebid.adnxs.com/pbc/v1/cache'
-            }
-    });
-    ```
-
+7. (Optional) If you want to monetize instream video, see the [Monetize instream video](#monetize-instream-video) section below.
 8. (Optional) If you want to monetize outstream video, you can choose among the following options:
-    * Use Index's outstream video player. For more information, see the [Index's outstream video player](#index-outstream-video-player) section below.
+    * Use Index's outstream video player. For more information, see the [Index's outstream ad unit](#indexs-outstream-ad-unit) section below.
     * Use your own outstream video player. For more information, see [Prebid’s documentation on how to show video ads.](/dev-docs/show-outstream-video-ads.html)
 9. (Optional) Configure Prebid Native with Index. For more information, see the [Prebid Native](#prebid-native-configuration) section below. Prebid Native is available from Prebid.js version 7.4.0 or higher.
 
@@ -143,15 +136,15 @@ In this configuration, Prebid.js makes a call to Prebid Server and then Prebid S
 
 ## Modules to include in your build process
 
-If you are building the JS binary on your own from source code, follow the instructions in [Prebid.js project README](https://github.com/prebid/Prebid.js/blob/master/README.md#build-optimization). You will need to include the `ixBidAdapter`. If you want to show video ads with Google Ad Manager, also include the `dfpAdServerVideo` module. We highly recommend adding the `gptPreAuction` module as well, which improves a DSP's ability to bid accurately on your supply. The following is an example build command that include these modules: <br />
-`gulp build --modules=ixBidAdapter,dfpAdServerVideo,gptPreAuction,fooBidAdapter,bazBidAdapter`
+If you are building the JS binary on your own from source code, follow the instructions in [Prebid.js project README](https://github.com/prebid/Prebid.js/blob/master/README.md#build-optimization). You will need to include the `ixBidAdapter`. If you want to show video ads with Google Ad Manager, also include the `gamAdServerVideo` module (named `dfpAdServerVideo` before Prebid.js 10). We highly recommend adding the `gptPreAuction` module as well, which improves a DSP's ability to bid accurately on your supply. The following is an example build command that include these modules: <br />
+`gulp build --modules=ixBidAdapter,gamAdServerVideo,gptPreAuction,fooBidAdapter,bazBidAdapter`
 
-If you are using a JSON file to specify modules, add `ixBidAdapter` and `dfpAdServerVideo` to the modules array as follows:
+If you are using a JSON file to specify modules, add `ixBidAdapter` and `gamAdServerVideo` to the modules array as follows:
 
 ```javascript
 [
     "ixBidAdapter",
-    "dfpAdServerVideo",
+    "gamAdServerVideo",
     "gptPreAuction",
     "fooBidAdapter",
     "bazBidAdapter"
@@ -166,7 +159,7 @@ You can set up the Prebid.js FPD module using Global data, Index bidder-specific
 
 <a name="prebid-fpd-module"></a>
 
-### Global data
+## Global data
 
 Use this data type to allow all bid adapters to have access to first party data that might be useful in ad targeting. This is available from Prebid.js version 4.30 and above.
 
@@ -187,7 +180,7 @@ pbjs.setConfig({
 
 <a id="index-bidder-specific-fpd-module"></a>
 
-### Index bidder-specific data
+## Index bidder-specific data
 
 This data type is available from Prebid version 7.49.0 and above. You can use it to specify key-value pairs that will be included in your query string when targeting deals. For example, if a user visits a news page, you can pass that information by submitting a key-value pair for `category = news`. You can then create a deal in the Index UI and activate the deal only on pages that contain `category = news` as the key-value pair.
 
@@ -207,7 +200,7 @@ pbjs.setConfig({
 
 <a id="adunit-specific-data"></a>
 
-### AdUnit-specific data
+## AdUnit-specific data
 
 Use this data type to specify key-value pairs at the ad unit level when targeting deals and apply it to all bidders. This will be available from Prebid.js version 7.46 and above. To include the adUnit-specific data in a bid request, see Prebid's [Supplying AdUnit-Specific Data](/features/firstPartyData.html#supplying-adunit-specific-data) documentation.
 
@@ -222,7 +215,23 @@ ortb2Imp: {
 }
 ```
 
-<a id="index-outstream-video-player"></a>
+## Monetize instream video 
+
+Unlike Outstream Video, instream video does not use the Prebid Universal Creative. Instead, video bids provide VAST that Prebid caches to obtain a cache ID that can be retrieved with a URL. The cache ID is passed as a key value to the ad server.  
+
+To monetize instream video, complete the following steps: 
+
+1. Enable a cache endpoint in the `[pbjs.setConfig()]` function as follows:
+
+   ```javascript
+   pbjs.setConfig({ 
+     cache: { 
+             url: 'https://my-pbs.example.com/cache'
+         } 
+   });
+   ```
+
+2. Set up your line items in Google Ad manger by following the instructions in Prebid's [Setting Up Video In GAM](/adops/setting-up-prebid-video-in-dfp.html) documentation. 
 
 ## Index's outstream ad unit
 
@@ -296,7 +305,7 @@ pbjs.addAdUnit({
 });
 ```
 
-*Please note that your use of the outstream video player will be governed by and subject to the terms and conditions of i) any master services or license agreement entered into by you and Index Exchange; ii) the information provided on our knowledge base linked [here](https://kb.indexexchange.com/publishers/prebid_integration/outstream_video_prebidjs.htm) and [here](https://kb.indexexchange.com/publishers/guidelines/standard_contractual_clauses.htm), and iii) our [Privacy Policy](https://www.indexexchange.com/privacy/). Your use of Index's outstream video player constitutes your acknowledgement and acceptance of the foregoing.*
+*Please note that your use of the outstream video player will be governed by and subject to the terms and conditions of i) any master services or license agreement entered into by you and Index Exchange; ii) the information provided on our knowledge base articles on [outstream video with Prebid.js](https://kb.indexexchange.com/publishers/prebid_integration/outstream_video_prebidjs.htm) and [standard contractual clauses](https://kb.indexexchange.com/publishers/guidelines/standard_contractual_clauses.htm), and iii) our [Privacy Policy](https://www.indexexchange.com/privacy/). Your use of Index's outstream video player constitutes your acknowledgement and acceptance of the foregoing.*
 
 <a id="prebid-native-configuration"></a>
 
@@ -309,30 +318,46 @@ pbjs.addAdUnits({
     code: slot.code,
     mediaTypes: {
         native: {
-            image: {
-                required: true,
-                sizes: [150, 50]
-            },
-            title: {
-                required: true,
-                len: 80
-            },
-            sponsoredBy: {
-                required: true
-            },
-            clickUrl: {
-                required: true
-            },
-            privacyLink: {
-                required: false
-            },
-            body: {
-                required: true
-                len: 90
-            },
-            icon: {
-                required: true,
-                sizes: [50, 50]
+            ortb: {
+                assets: [{
+                    id: 1,
+                    required: 1,
+                    img: {
+                        type: 3,
+                        w: 150,
+                        h: 50,
+                    }
+                },
+                {
+                    id: 2,
+                    required: 1,
+                    title: {
+                        len: 80
+                    }
+                },
+                {
+                    id: 3,
+                    required: 1,
+                    data: {
+                        type: 1
+                    }
+                },
+                {
+                    id: 4,
+                    required: 1,
+                    data: {
+                        type: 2
+                    }
+                },
+                {
+                    id: 6,
+                    required: 1,
+                    img: {
+                        type: 1,
+                        w: 50,
+                        h: 50,
+                    }
+                }]
             }
         }
     },
@@ -349,43 +374,119 @@ pbjs.addAdUnits({
 
 ## Protected Audience API support
 
+**Note:** Prebid.js 11.0 removed Protected Audience API support (the `paapi` and `paapiForGpt` modules), so this section applies only to Prebid.js 10.x and earlier.
+
+**Info:** Starting in June 2025, Index is pausing support for the Protected Audience API. After this date, you will no longer receive Protected Audience API demand from Index, even if your inventory is configured to be eligible for it.
+
 **Before you begin:**
 
-* You must have Google Ad Manager and the [fledgeForGpt](/dev-docs/modules/fledgeForGpt.html) module.
+* You must be using Google Ad Manager as your ad server.
 * In your Google Ad Manager configuration, make sure that you have not opted out from using the Protected Audience API. For more information about the configuration, see Google's documentation on  [Protected Audience API and Ad Manager after Chrome GA](https://support.google.com/admanager/answer/13627134?hl=en&ref_topic=12264880&sjid=10591375417866092080-NA).
 
-Follow these steps to configure your Prebid.js to specify that your ad slots are enabled for [Protected Audience](https://github.com/WICG/turtledove/blob/main/FLEDGE.md) auctions:
+Depending on the Prebid.js version that you are using, the steps to configure Prebid.js will differ. Follow the steps provided in the appropriate section for the version of Prebid.js that you are using:
 
-1. If required, update your Prebid.js version to 8.18.0 or later.
-2. Build the `fledgeForGpt` module in your Prebid.js configuration by adding `fledgeForGpt` to the list of modules that you are already using. For more information about the module, see Prebid's [Fledge (Protected Audience) for GPT Module](/dev-docs/modules/fledgeForGpt.html) documentation.
-3. Enable all ad units to use the `fledgeForGpt` module in your prebid.js configuration. You can do this in the global-level configuration, bidder level, or ad-unit level. For more information about the configurations, see Prebid's [Fledge (Protected Audience) for GPT Module](/dev-docs/modules/fledgeForGpt.html) documentation. Index recommends that you do this in the global-level configuration by using the `defaultForSlots` parameter with a value of `1`. <br />
-**Note:** If you are using the `fledgeForGpt.bidders[]`, make sure that you add `ix` to the list of bidders.<br />
-The following shows an example of the configuration done at the global level:
+**Configure Protected Audience API for Prebid.js versions 8.18.0 to 8.36.0**
 
-```javascript
-pbjs.que.push(function() {
-  pbjs.setConfig({
-    fledgeForGpt: {
-      enabled: true,
-      defaultForSlots: 1
-    }
+1. Build the [PAAPI module](/dev-docs/modules/paapi.html) and the Fledge for GPT module in your Prebid.js configuration by adding `paapi` and `fledgeForGpt` to the list of modules that you are already using. <br />
+**Note:** The `fledgeForGpt` module documentation no longer exists on Prebid's site. You can however refer to Prebid's [Protected Audience API (PAAPI) for GPT Module](/dev-docs/modules/paapiForGpt.html) documentation for information on adding module configurations.
+2. Configure your ad units to make them eligible for Protected Audience API demand. You can do this in the global-level configuration, bidder level, or ad-unit level. Index recommends that you do this in the global-level configuration by using the `defaultForSlots` parameter with a value of `1`. The following code is an example of the configuration done at the global level:
+
+    ```javascript
+     pbjs.que.push(function() {
+       pbjs.setConfig({
+        paapi: {
+        enabled: true,
+        defaultForSlots: 1
+          }
+       });
+    });
+    ```
+
+    **Note:** If you are using the `paapiForGpt.bidders[]`, make sure that you include `ix` to the list of bidders as follows:
+
+    ```javascript
+     pbjs.que.push(function() { 
+       pbjs.setConfig({
+        paapi: { 
+        enabled: true,
+        bidders: ['ix', /* any other bidders */],
+        defaultForSlots: 1
+          }
+       });
+    });
+    ```
+
+**Configure Protected Audience API for Prebid.js versions 8.37.0 and up to 9.0.0**
+
+1. Build the PAAPI module in your Prebid.js configuration by adding `fledgeForGpt` to the list of modules that you are already using. When you add the `fledgeForGpt` module, the `paapi` module automatically gets included as a sub-module. For more information about the module, see Prebid's [PAAPI module](/dev-docs/modules/paapi.html) documentation. <br />
+**Note:** The `fledgeForGpt` module documentation no longer exists on Prebid's site. You can however refer to Prebid's [Protected Audience API (PAAPI) for GPT Module](/dev-docs/modules/paapiForGpt.html) documentation for information on adding module configurations.
+2. Complete the following steps to make your ad units eligible for Protected Audience API demand: <br />
+**Note:** If you continue to use the `fledgeForGpt` property, you will receive a warning message in the console logs stating that the `fledgeForGpt` configuration options will soon be renamed to `paapi`. Therefore, Index recommends that you use the `paapi` property, which is available in Prebid.js version 8.37.0 or later.
+    * In the `pbjs.setConfig().paapi` field, set the `defaultForSlots` parameter to `1`:
+
+     ```javascript
+     pbjs.que.push(function() {
+       pbjs.setConfig({
+         fledgeForGpt: {
+          enabled: true,
+          defaultForSlots: 1,
+          bidders: ['ix', /* any other bidders */],
+          });
+      });
+     ```
+
+    * In the `paapi.gpt.autoconfig` field, set `autoconfig` to `false`. This step is important because, by default, the `paapiForGpt` module expects the Google Publisher Tag (GPT) ad units to be loaded before the Protected Audience configuration is added to the ad unit. Setting `autoconfig` to `false` will avoid any race conditions resulting from asynchronous libraries being loaded out of order, which would prevent the ad unit from being properly configured for Protected Audience API.<br />
+**Note:** The `paapiForGpt.autoconfig` property is also backward compatible and can be used in place of the `paapi.gpt.autoconfig` property. However, Index recommends that you use the `paapi.gpt.autoconfig` property.<br />
+
+     ```javascript
+     pbjs.que.push(function() {
+       pbjs.setConfig({
+         paapi: {
+           enabled: true,
+           defaultForSlots: 1
+           gpt: {
+              autoconfig: false
+               },
+           bidders: ['ix', /* any other bidders */],
+          });
+        });
+     ```
+
+    * In the `pbjs.requestBids.bidsBackHandler` function, call the `pbjs.setPAAPIConfigForGPT()` function as follows:<br />
+**Note:** When calling the `pbjs.setPAAPIConfigForGPT();` function, make sure that you check the following:
+       * The function must be called in the `bidsBackHandler` each time new bids are requested (for example when refreshing `adSlots`). This is important because, when `autoconfig` is disabled, the `auctionConfig` needs to be associated with a GPT ad unit manually by calling `pbjs.setPAAPIConfigForGPT()`.
+       * The function must be called before the `pbjs.setTargetingForGPTAsync()` function. This is important because the Protected Audience configuration needs to be associated with a GPT ad unit before the Google Ad Manager call is executed.
+
+     ```javascript
+      pbjs.requestBids({, ,  
+       // ... 
+       bidsBackHandler: function(bids, timedOut, auctionId) {  
+         pbjs.setPAAPIConfigForGPT(); 
+         pbjs.setTargetingForGPTAsync(); 
+        // ... 
+        } 
+      }) 
+     ```
+
+**Configure Protected Audience API for Prebid.js version 9.0.0 or later**
+
+1. Build the PAAPI for GPT module in your Prebid.js configuration by adding `paapi` to the list of modules that you are already using. For more information about the module, see Prebid's [Protected Audience API (PAAPI) for GPT Module](/dev-docs/modules/paapiForGpt.html) documentation.
+2. In the `pbjs.setConfig().paapi` field, set the `defaultForSlots` parameter to `1`. 
+3. In the `paapi.gpt.configWithTargeting` field, set `configWithTargeting` to `true`. For more control over configuring GPT slots to use PAAPI, set the `configWithTargeting` to `false` and use the `setPAAPIConfigForGPT` API. For more information about the configurations, see Prebid's [Protected Audience API (PAAPI) for GPT Module](/dev-docs/modules/paapiForGpt.html) documentation. <br />The following code is an example of the `defaultForSlots` and `configWithTargeting` configuration:
+
+  ```javascript
+  pbjs.que.push(function() {
+    pbjs.setConfig({
+       paapi: {
+         enabled: true,
+         defaultForSlots: 1  
+         gpt: { 
+           configWithTargeting: true
+          }, 
+         bidders: ['ix', /* any other bidders */],
+     });
   });
-});
-```
-
-The following shows an example of the configuration done at the ad-unit level:
-
-```javascript
-pbjs.addAdUnits({
-    code: "my-adunit-div",
-    // other config here
-    ortb2Imp: {
-        ext: {
-            ae: 1
-        }
-    }
-});
-```
+  ```
 
 <a id="signal-inventory-using-external-ids"></a>
 
@@ -434,32 +535,32 @@ pbjs.addAdUnits({
 
 For a list of the OpenRTB fields that Index supports in bid requests, see [List of supported OpenRTB bid request fields for sellers](https://kb.indexexchange.com/publishers/openrtb_integration/list_of_supported_openrtb_bid_request_fields_for_sellers.htm#List_of_supported_OpenRTB_bid_request_fields_for_sellers). The following are the required fields for the various supported media types.
 
-### Banner
+## Banner
 
 You must include these parameters at the bidder level.
 
 {: .table .table-bordered .table-striped }
 
 | Name | Scope | Type | Description |
-|---|---|---|---|
-| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'`|
+| --- | --- | --- | --- |
+| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'` |
 
-### Video
+## Video
 
 You must include these parameters at the bidder level.
 
 {: .table .table-bordered .table-striped }
 
 | Name | Scope | Type | Description |
-|---|---|---|---|
-| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. It will be associated with the single size, if the size is provided. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'`<br /> **Note:** You can re-use the existing `siteId` within the same flex position or video size, if the video adapts to the containing `<div>` element.|
+| --- | --- | --- | --- |
+| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. It will be associated with the single size, if the size is provided. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'`<br /> **Note:** You can re-use the existing `siteId` within the same flex position or video size, if the video adapts to the containing `<div>` element. |
 
 If you are using Index's outstream ad unit and have placed the video object at the bidder level, you must include the Index required parameters at the bidder level. You can include the optional parameters to specify the outstream player configurations.
 
 {: .table .table-bordered .table-striped }
 
 | Name | Scope | Type | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `video.w` | Required | Integer | The width of the video player in pixels that will be passed to demand partners. You must define the size of the video player using the `video.w` and `video.h` parameters. We strongly recommend video sizes to be `256 x 256` or greater, `300 x 250`, or `320 x 180`. |
 | `video.h` | Required | Integer | The height of the video player in pixels that will be passed to demand partners. You must define the size of the video player using the `video.w` and `video.h` parameters. We strongly recommend video sizes to be `256 x 256` or greater, `300 x 250`, or `320 x 180`. |
 | `video.playerSize` | Required | Integer[] | The video player size that will be passed to demand partners. |
@@ -468,7 +569,7 @@ If you are using Index's outstream ad unit and have placed the video object at t
 | `video.playerConfig.floatSize` | Optional | Integer[] | The height and width of the floating player in pixels. If you do not specify a float size, the player adjusts to the aspect ratio of the player size that is defined when it is not floating. Index recommends that you review and test the float size to your user experience preference. |
 | `video.plcmt` | Required | Integer[] | The video's placement type, where: <br /> - `1` = Instream<br /> - `2` = Accompanying Content <br /> - `3` = Interstitial <br /> - `4` = No Content/Standalone |
 
-### Native
+## Native
 
 Index supports the same set of native assets that Prebid.js recognizes. For the list of native assets, see [Prebid.js Native Implementation Guide on the Prebid site.](https://docs.prebid.org/prebid/native-implementation.html#3-prebidjs-native-adunit-overview)
 
@@ -476,18 +577,18 @@ Index supports the same set of native assets that Prebid.js recognizes. For the 
 
 ## Multi-format ad units
 
-Index supports multi-format ad units, see [Show Multi-Format Ads with Prebid.js](https://docs.prebid.org/dev-docs/show-multi-format-ads.html). For multi-format ad units, you can optionally specify a different siteId for each multi-format type at the bidder  level. This is useful  if you have deals set up with Index at the siteId level. See multi-format examples [here](#examples).
+Index supports multi-format ad units, see [Show Multi-Format Ads with Prebid.js](https://docs.prebid.org/dev-docs/show-multi-format-ads.html). For multi-format ad units, you can optionally specify a different siteId for each multi-format type at the bidder  level. This is useful  if you have deals set up with Index at the siteId level. See the [multi-format examples](#examples).
 
 The following are the parameters that you can specify for each multi-format type at the bidder level.
 
 {: .table .table-bordered .table-striped }
 
 | Name | Scope | Type | Description |
-|---|---|---|---|
-| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'`. <br><br><b>Note:</b> This will also act as the default siteID for multi-format adunits if a format specific siteId is not provided.|
-| `banner.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `banner` format in the multi-format ad unit.|
-| `video.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `video` format in the multi-format ad unit.|
-| `native.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `native` format in the multi-format ad unit.|
+| --- | --- | --- | --- |
+| `siteId` | Required | String | An Index-specific identifier that is associated with this ad unit. This is similar to a placement ID or an ad unit ID that some other modules have. For example, `'9999990'`, `'9999991'`, `'9999992'`. <br><br><b>Note:</b> This will also act as the default siteID for multi-format adunits if a format specific siteId is not provided. |
+| `banner.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `banner` format in the multi-format ad unit. |
+| `video.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `video` format in the multi-format ad unit. |
+| `native.siteId` | Optional | String | An Index-specific identifier that is associated with this ad unit. This siteId will be prioritized over the default siteID for `native` format in the multi-format ad unit. |
 
 <a id="examples"></a>
 
@@ -526,7 +627,6 @@ var adUnits = [{
     mediaTypes: {
         video: {
             // Preferred location as of version 4.43
- video obj
             context: 'instream',
             playerSize: [300, 250],
             api: [2],
@@ -534,7 +634,8 @@ var adUnits = [{
             minduration: 5,
             maxduration: 30,
             mimes: ['video/mp4', 'application/javascript'],
-            placement: 3
+            placement: 3,
+            plcmt: 1
         }
     },
     bids: [{
@@ -593,30 +694,46 @@ pbjs.addAdUnits({
     code: slot.code,
     mediaTypes: {
         native: {
-            image: {
-                required: true,
-                sizes: [150, 50]
-            },
-            title: {
-                required: true,
-                len: 80
-            },
-            sponsoredBy: {
-                required: true
-            },
-            clickUrl: {
-                required: true
-            },
-            privacyLink: {
-                required: false
-            },
-            body: {
-                required: true
-                len: 90
-            },
-            icon: {
-                required: true,
-                sizes: [50, 50]
+            ortb: {
+                assets: [{
+                    id: 1,
+                    required: 1,
+                    img: {
+                        type: 3,
+                        w: 150,
+                        h: 50,
+                    }
+                },
+                {
+                    id: 2,
+                    required: 1,
+                    title: {
+                        len: 80
+                    }
+                },
+                {
+                    id: 3,
+                    required: 1,
+                    data: {
+                        type: 1
+                    }
+                },
+                {
+                    id: 4,
+                    required: 1,
+                    data: {
+                        type: 2
+                    }
+                },
+                {
+                    id: 6,
+                    required: 1,
+                    img: {
+                        type: 1,
+                        w: 50,
+                        h: 50,
+                    }
+                }]
             }
         }
     },

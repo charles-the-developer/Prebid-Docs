@@ -6,32 +6,26 @@ description: If you have users in California, this module works with your Consen
 module_code : consentManagementUsp
 display_name : Consent Management - US Privacy
 enable_download : true
-recommended: true
+recommended: false
 sidebarType : 1
 ---
 
 # US Privacy Consent Management Module
-
 {: .no_toc }
 
 * TOC
 {: toc }
 
-{% capture legalNotice %}
-
-  This resource should not be construed as legal advice and Prebid.org makes no guarantees about compliance with any law or regulation. Please note that because every company and its collection, use, and storage of personal data is different, you should seek independent legal advice relating to obligations under European and /or US regulations, including the GDPR, the ePrivacy Directive and CCPA. Only a lawyer can provide you with legal advice specifically tailored to your situation. Nothing in this guide is intended to provide you with, or should be used as a substitute for, legal advice tailored to your business.
-  {% endcapture %}
-
-{% include /alerts/alert_important.html content=legalNotice %}
+{% include legal-warning.html %}
 
 ## Overview
 
 This consent management module is designed to support the California Consumer Privacy Act ([CCPA](https://www.iab.com/guidelines/ccpa-framework/)). The IAB has generalized these guidelines to cover future regulations, referring to the feature as "US Privacy."
 
-This module works with an IAB-compatible US Privacy API (USP-API) to fetch an encoded string representing the user's notice and opt-out choices and make it available for adapters to consume and process. In Prebid 7+; the module defaults to working with an IAB-compatible US Privacy API; in prior versions, the module had to be configured to be in effect.
+This module works with an IAB-compatible US Privacy API (USP-API) to fetch an encoded string representing the user's notice and opt-out choices and make it available for adapters to consume and process. In Prebid 7+; the module defaults to working with an IAB-compatible US Privacy API; in prior versions, the module had to be configured to be in effect. This module is no longer recommended, as the signal is no longer supported by a contractual framework as of January 31, 2024.
 
 {: .alert.alert-info :}
-See also the [Prebid Consent Management - GDPR Module](/dev-docs/modules/consentManagement.html) for supporting the EU General Data Protection Regulation (GDPR)
+See also the [Prebid Consent Management - TCF Module](/dev-docs/modules/consentManagementTcf.html) for supporting the IABTL Transparency and Consent Framework.
 
 Here's a summary of the interaction process:
 
@@ -48,10 +42,10 @@ If the timeout period expires or an error from the USP-API is thrown, the auctio
 {: .table .table-bordered .table-striped }
 | String Component | Values |
 | --- | --- |
-| 1) Specification Version|    1|
-| 2) Explicit Notice/Opportunity to Opt Out|    (N = No,Y = Yes,– = Not Applicable)|
-| 3) Has user opted-out of the sale of his or her personal information?|     (N = No,Y = Yes,– = Not Applicable)|
-| 4) Publisher is a signatory to the IAB Limited Service Provider Agreement|     (N = No,Y = Yes,– = Not Applicable)|
+| 1) Specification Version | 1 |
+| 2) Explicit Notice/Opportunity to Opt Out | (N = No,Y = Yes,– = Not Applicable) |
+| 3) Has user opted-out of the sale of his or her personal information? | (N = No,Y = Yes,– = Not Applicable) |
+| 4) Publisher is a signatory to the IAB Limited Service Provider Agreement | (N = No,Y = Yes,– = Not Applicable) |
 
 ### Deletes
 
@@ -86,6 +80,7 @@ Here are the parameters supported in the `consentManagement` object:
 | usp | `Object` | | |
 | usp.cmpApi | `string` | The USP-API interface that is in use. Supported values are **'iab'** or **'static'**. Static allows integrations where IAB-formatted strings are provided in a non-standard way. Default is `'iab'`. | `'iab'` |
 | usp.timeout | `integer` | Length of time (in milliseconds) to allow the USP-API to obtain the CCPA string. Default is `50`. | `50` |
+| usp.waitForCmp | `boolean` | If `__uspapi` is not yet present when Prebid looks for it, wait (polling every 100ms, up to `usp.timeout`) for it to appear before giving up. This supports non-compliant integrations that load their CMP stub late. Per the [USP API spec](https://github.com/InteractiveAdvertisingBureau/USPrivacy/blob/master/CCPA/USP%20API.md), the stub should already be present synchronously before Prebid loads, so this should only be needed to work around a non-compliant page. Defaults to `false`. | `true` |
 | usp.consentData | `Object` | An object representing the CCPA notice and opt-out status data being passed directly; only used when cmpApi is 'static'. Default is `undefined`. | |
 
 {: .alert.alert-info :}
@@ -132,7 +127,25 @@ Example 2: Support US Privacy; timeout the api availability at zero because it i
      });
 ```
 
-Example 3: Static CMP using custom data passing. Placing this config call in the command queue before loading Prebid is important to ensure the string is available before Prebid begins making external calls.
+Example 3: IAB CMP that may load its stub later than Prebid.js (e.g. injected asynchronously). Prebid will poll for `__uspapi` for up to `timeout` before giving up.
+
+```javascript
+     var pbjs = pbjs || {};
+     pbjs.que = pbjs.que || [];
+     pbjs.que.push(function() {
+        pbjs.setConfig({
+          consentManagement: {
+            usp: {
+              cmpApi: 'iab',
+              timeout: 8000,
+              waitForCmp: true
+            }
+          }
+        });
+     });
+```
+
+Example 4: Static CMP using custom data passing. Placing this config call in the command queue before loading Prebid is important to ensure the string is available before Prebid begins making external calls.
 
 ```javascript
      var pbjs = pbjs || {};
@@ -153,7 +166,7 @@ Example 3: Static CMP using custom data passing. Placing this config call in the
      });
 ```
 
-Example 4: Static CMP with USP string set to does not apply for all fields, which may be useful to prevent excessive interaction with the `__uspapi` outside of the geographic scope. Placing this config call in the command queue before loading Prebid is important to ensure it is available early.
+Example 5: Static CMP with USP string set to does not apply for all fields, which may be useful to prevent excessive interaction with the `__uspapi` outside of the geographic scope. Placing this config call in the command queue before loading Prebid is important to ensure it is available early.
 
 ```javascript
      var pbjs = pbjs || {};

@@ -9,7 +9,7 @@ sidebarType: 0
 
 A high-level explanation of what header bidding is, what its benefits are, and how it works.
 
-<div style="padding:56.25% 0 0 0;margin: 1rem 0;position:relative;"><iframe src="https://player.vimeo.com/video/820684821?h=d55a008b4b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="1.2_Intro-to-HB_v6"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+{% include vimeo-iframe.html id="820684821" title="820684821" %}
 
 Further Content:
 
@@ -62,7 +62,9 @@ When a web page or app loads, the header bidding wrapper also loads. The wrapper
 
 In a fraction of a second, the buyers respond with bids containing the ad they want to serve, the price they're willing to pay, and other relevant information. The header bidding wrapper then collects and passes these bids to the primary ad server.
 
-The ad server considers the header bidding bids alongside other potential buyers and decides which buyer wins. Within the ad server, header bidding bids compete based on price and do not interfere with the delivery of reserved, guaranteed and sponsorship campaigns. When the ad server chooses a header bidding buyer, it works with the wrapper to render the ad to the page.
+In this setup, the ad server considers the header bidding bids alongside other potential buyers and decides which buyer wins. Within the ad server, header bidding bids compete based on price and do not interfere with the delivery of reserved, guaranteed and sponsorship campaigns. When the ad server chooses a header bidding buyer, it works with the wrapper to render the ad to the page.
+
+Alternatively, the wrapper can make the final decision itself, with the ad server bidding into the header bidding auction alongside other buyers. Prebid supports this with [priority bids](/dev-docs/publisher-api-reference/bidderSettings.html#212-allowprioritybids), so reserved and sponsorship campaigns from the ad server can still be prioritized correctly.
 
 ### Header Bidding and Prebid
 

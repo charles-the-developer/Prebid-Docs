@@ -12,17 +12,12 @@ sidebarType : 1
 ---
 
 # GPP Consent Management Module
-
 {: .no_toc }
 
 - TOC
 {: toc }
 
-{% capture legalNotice %}
-  This resource should not be construed as legal advice and Prebid.org makes no guarantees about compliance with any law or regulation. Please note that because every company's collection, use, and storage of personal data is different, you should seek independent legal advice relating to obligations under European, Canadian and /or US regulations, including the GDPR, the ePrivacy Directive and CCPA. Only a lawyer can provide you with legal advice specifically tailored to your situation. Nothing in this guide is intended to provide you with, or should be used as a substitute for, legal advice tailored to your business.
-  {% endcapture %}
-
-{% include /alerts/alert_important.html content=legalNotice %}
+{% include legal-warning.html %}
 
 ## Overview
 
@@ -48,6 +43,8 @@ If the timeout period expires or an error from the CMP is thrown, one of these a
 - The auction is canceled outright.
 - The auction proceeds without the user's consent information.
 
+Since Prebid.js 11.14, if the CMP lookup fails (for example, because no CMP is found or the CMP returns an error), the [User ID module](/dev-docs/modules/userId.html#user-id-gdpr-permissions-and-opt-out) does not run. Timeouts do not have this effect.
+
 ## Page Integration
 
 To utilize this module, a Consent Management Platform (CMP) compatible with the [IAB GPP CMP spec](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform/blob/main/Core/CMP%20API%20Specification.md) needs to be implemented on the site to interact with the user and obtain their consent choices.  It's important to understand the details of how the CMP works before integrating it with Prebid.js.
@@ -59,18 +56,22 @@ Once the CMP is implemented, simply include this module into your build and add 
 Here are the parameters supported in the `consentManagement` object specific for the GPP consent module:
 
 {: .table .table-bordered .table-striped }
+
 | Param | Type | Description | Example |
 | --- | --- | --- | --- |
 | gpp | `Object` | | |
+| gpp.enabled | `boolean` | Enables or disables the GPP consent management module. When set to `false`, Prebid does not initialize the CMP integration, does not delay auctions for consent, removes any active CMP event listeners. Defaults to `true` if not specified. | `false` |
 | gpp.cmpApi | `string` | The CMP interface that is in use. Supported values are **'iab'** or **'static'**. Static allows integrations where IAB-formatted consent strings are provided in a non-standard way. Default is `'iab'`. | `'iab'` |
 | gpp.timeout | `integer` | Length of time (in milliseconds) to allow the CMP to obtain the GPP consent information. Default is `10000`. | `10000` |
+| gpp.actionTimeout | `integer` | Length of time (in milliseconds) to allow the user to take action to consent if they have not already done so. The actionTimer first waits for the CMP to load, then the actionTimeout begins for the specified duration. Default is `undefined`. | `10000` |
+| gpp.waitForCmp | `boolean` | If `__gpp` is not yet present when Prebid looks for it, wait (polling every 100ms, up to `gpp.timeout`) for it to appear before giving up. This supports non-compliant integrations that load their CMP stub late. Per the [GPP spec](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform/blob/main/Core/CMP%20API%20Specification.md), the CMP stub should already be present synchronously before Prebid loads, so this should only be needed to work around a non-compliant page. Defaults to `false`. | `true` |
 | gpp.consentData | `Object` | An object representing the IAB GPP consent data being passed directly; only used when cmpApi is 'static'. Default is `undefined`. | |
 | gpp.consentData.sectionId | `integer` | Indicates the header section of the GPP consent string, recommended to be `3`. | |
 | gpp.consentData.gppVersion | `string` | The version number parsed from the header of the GPP consent string. | |
 | gpp.consentData.sectionList | `Array of integers` | The sections contained within the encoded GPP string as parsed from the header. | |
 | gpp.consentData.applicableSections | `Array of integers` | Section ID considered to be in force for this transaction.  In most cases, this field should have a single section ID. In rare occasions where such a single section ID can not be determined, the field may contain up to 2 values. The value can be 0 or a Section ID specified by the Publisher / Advertiser, during stub / load. When no section is applicable, the value will be -1. | |
 | gpp.consentData.gppString | `String` | The complete encoded GPP string. | |
-| gpp.consentData.pingData | `Object` | An object representing the current status of the CMP at the time consent data was fetched.  See PingReturn in [IAB's CMP API doc](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform/blob/main/Core/CMP%20API%20Specification.md#ping) for further information. |  |
+| gpp.consentData.pingData | `Object` | An object representing the current status of the CMP at the time consent data was fetched.  See PingReturn in [IAB's CMP API doc](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform/blob/main/Core/CMP%20API%20Specification.md#ping) for further information. | |
 
 {: .alert.alert-info :}
 In addition to the static approach described above, there is another means to pass already known GPP consent data of a user via the Prebid.js [First Party Data](https://docs.prebid.org/features/firstPartyData.html) feature.  The values for `gppString` and `applicableSections` can be passed via the `ortb2.regs.gpp` and `ortb2.regs.gpp_sid` fields respectively; other fields in the GPP data object listed above are not available via the `ortb2` structure.  If the GPP consent module is present and successfully obtains the consent information from the CMP, it will override the GPP values set originally in the `ortb2` object (as we assume the CMP's values will be more up-to-date).  Please visit the [First Party Data](https://docs.prebid.org/features/firstPartyData.html) page for more overall information and examples.
@@ -96,7 +97,25 @@ Example 1: IAB CMP using a custom timeout
      });
 ```
 
-Example 2: Static CMP using custom data passing.
+Example 2: IAB CMP that may load its stub later than Prebid.js (e.g. injected asynchronously). Prebid will poll for `__gpp` for up to `timeout` before giving up.
+
+```javascript
+     var pbjs = pbjs || {};
+     pbjs.que = pbjs.que || [];
+     pbjs.que.push(function() {
+        pbjs.setConfig({
+          consentManagement: {
+            gpp: {
+              cmpApi: 'iab',
+              timeout: 8000,
+              waitForCmp: true
+            }
+          }
+        });
+     });
+```
+
+Example 3: Static CMP using custom data passing.
 
 ```javascript
      var pbjs = pbjs || {};
@@ -120,6 +139,22 @@ Example 2: Static CMP using custom data passing.
      });
 ```
 
+Example 4: Disabling the module. When disabled, Prebid.js will not fetch GPP data, will not wait for the CMP. Existing CMP listeners (if any were previously active) are cleaned up.
+
+```javascript
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
+    pbjs.que.push(function() {
+      pbjs.setConfig({
+        consentManagement: {
+          gpp: {
+            enabled: false
+          }
+        }
+      });
+    });
+```
+
 ## Build the Package
 
 Follow the basic build instructions in the GitHub Prebid.js repo's main [README](https://github.com/prebid/Prebid.js/blob/master/README.md). To include the consent management module, an additional option must be added to the **gulp build** command:
@@ -134,7 +169,7 @@ You can also use the [Prebid.js Download](/download.html) page.
 
 {: .alert.alert-info :}
 
-If you are submitting changes to an adapter to support GPP, please also submit a PR to the [docs repo](https://github.com/prebid/prebid.github.io) to add the `gpp_supported: true` variable to your respective page in the [bidders directory](https://github.com/prebid/prebid.github.io/tree/master/dev-docs/bidders).  **This will ensure that your adapter's name will automatically appear on the list of adapters supporting GPP.**
+If you are submitting changes to an adapter to support GPP, please also submit a PR to the [docs repo](https://github.com/prebid/prebid.github.io) to add the `gpp_sids` meta data with a comma separated list of section names (`tcfeu`, `tcfca`, `usnat`, `usstate_all`, `usp`) to your respective page in the [bidders directory](https://github.com/prebid/prebid.github.io/tree/master/dev-docs/bidders).  **This will ensure that your adapter's name will automatically appear on the list of adapters supporting GPP.**
 
 ### Bidder Adapter GPP Integration
 
@@ -177,7 +212,7 @@ Depending on your needs, you could include the consent information in a query of
 
 ## Adapters Supporting GPP
 
-Bidders on this list have self-declared their GPP support in their [github.com/prebid/prebid.github.io/tree/master/dev-docs/bidders] md file by adding "gpp_supported: true".
+Bidders on this list have self-declared their GPP support in their [github.com/prebid/prebid.github.io/tree/master/dev-docs/bidders] md file by adding "gpp_sids: tcfeu, tcfca, usnat, usstate_all, usp".
 
 <script src="/assets/js/dynamicTable.js" type="text/javascript"></script>
 
@@ -186,9 +221,9 @@ var adaptersSupportingGpp=[];
 var idx_gdpr=0;
 {% assign bidder_pages = site.pages | where: "layout", "bidder" %}
 {% for item in bidder_pages %}
-    {% if item.gpp_supported == true %}
+    {% if item.gpp_supported == true or item.gpp_sids %}
     adaptersSupportingGpp[idx_gdpr]={};
-    adaptersSupportingGpp[idx_gdpr].href="/dev-docs/bidders.html#{{item.biddercode}}";
+    adaptersSupportingGpp[idx_gdpr].href="/dev-docs/bidders/{{item.biddercode}}";
     adaptersSupportingGpp[idx_gdpr].text="{{item.title}}";
     idx_gdpr++;
     {% endif %}
@@ -205,7 +240,7 @@ var idx_gdpr=0;
 
 - [IAB Global Privacy Platform Full Specification Repository](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform)
 - [IAB Global Privacy Platform CMP API Specification](https://github.com/InteractiveAdvertisingBureau/Global-Privacy-Platform/blob/main/Core/CMP%20API%20Specification.md)
-- [Prebid Consent Management - GDPR Module](/dev-docs/modules/consentManagement.html)
+- [Prebid Consent Management - GDPR Module](/dev-docs/modules/consentManagementTcf.html)
 - [Prebid Consent Management - US Privacy Module](/dev-docs/modules/consentManagementUsp.html)
 - [Prebid Activity Controls](/dev-docs/activity-controls.html)
 - [Prebid Activity Controls -- GPP control module - usnat](/dev-docs/modules/gppControl_usnat.html)

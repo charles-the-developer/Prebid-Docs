@@ -40,6 +40,8 @@ This module does its checks at the beginning of each auction.
 When a data field doesn't meet the defined validations, it will be removed. In addition, the module will look for the _pubcid_optout cookie (or local storage),
 and if it exists, certain fields will be removed.
 
+Since Prebid.js 11.26, the [Debugging module](/dev-docs/modules/debugging.html#first-party-data-validation) applies the same validations whenever it is installed, but only logs invalid fields as warnings without removing them.
+
 {: .table .table-bordered .table-striped }
 | Field | Validations | Notes |
 | --- | --- | --- |
@@ -65,5 +67,4 @@ and if it exists, certain fields will be removed.
 # Related Reading
 
 - [Prebid.js First Party Data feature](/features/firstPartyData.html)
-- [First Party Data Enrichment Module](/dev-docs/modules/enrichmentFpdModule)
 - [OpenRTB 2.5](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf)

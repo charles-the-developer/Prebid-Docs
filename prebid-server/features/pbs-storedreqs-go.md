@@ -13,7 +13,8 @@ Configure your server to read stored requests from the filesystem:
 
 ```yaml
 stored_requests:
-  filesystem: true
+  filesystem:
+    enabled: true
 ```
 
 Choose an ID to reference your stored request data. Throughout this doc, replace {id} with the ID you've chosen.
@@ -38,7 +39,7 @@ Add the file `stored_requests/data/by_id/stored_imps/{id}.json` and populate it 
   "ext": {
     "prebid": {
       "bidder": {
-        "appnexus": {
+        "msft": {
           "placement_id": 12883451
         }
       }
@@ -96,7 +97,7 @@ You can also store _part_ of the Imp on the server. For example:
   "ext": {
     "prebid": {
       "bidder": {
-        "appnexus": {
+        "msft": {
           "placement_id": 12883451
         }
       }

@@ -24,7 +24,7 @@
   type: leader
 
 - company: SpotX
-  link: https://spotx.tv
+  link: https://www.magnite.com/
   imgURL: /assets/images/partners/leader/spotx_logo.png
   type: leader
 
@@ -171,11 +171,6 @@
 - company: AdForm
   link: https://site.adform.com/
   imgURL: /assets/images/partners/community/Adform-Logo.png
-  type: community
-
-- company: Adomik
-  link: https://adomik.com/
-  imgURL: /assets/images/partners/community/Adomik-logo.png
   type: community
 
 - company: Adtelligent
